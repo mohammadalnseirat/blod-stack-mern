@@ -1,10 +1,72 @@
-import React from "react";
-import { Button, Label, TextInput } from "flowbite-react";
-import { Link } from "react-router-dom";
+import React, { useEffect, useState } from "react";
+import { Alert, Button, Label, Spinner, TextInput } from "flowbite-react";
+import { Link, useNavigate } from "react-router-dom";
+import { FaEye, FaEyeSlash } from "react-icons/fa";
+import { VscError } from "react-icons/vsc";
+import { FaHandshake } from "react-icons/fa";
 
 const SignUp = () => {
+  const [showPassword, setShowPassword] = useState(false);
+  const [formData, setFormData] = useState({});
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [success, setSuccess] = useState(false);
+  const navigate = useNavigate();
+
+  // handle change the input field:
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.id]: e.target.value.trim() });
+  };
+
+  let timeOutId;
+
+  // handle submit the form:
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!formData.username || !formData.email || !formData.password) {
+      return setError("Please Fill All required Fields!.");
+    }
+    try {
+      setLoading(true), setError(null), setSuccess(false);
+      // create response:
+      const res = await fetch("/api/auth/signup", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formData),
+      });
+      // convert the data:
+      const data = await res.json();
+      if (data.success === false) {
+        setError(data.message);
+        setLoading(false);
+        return;
+      }
+      setLoading(false);
+      setSuccess(true);
+      // redirect to login page:
+      if (res.ok) {
+        timeOutId = setTimeout(()=>{
+          navigate("/sign-in");
+        },2000)
+        
+      }
+    } catch (error) {
+      setError(error.message);
+      setLoading(false);
+    }
+  };
+
+  useEffect(()=>{
+    if(timeOutId){
+      clearTimeout(timeOutId);
+      setSuccess(false);
+    }
+  },[timeOutId])
+
   return (
-    <div className="min-h-screen mt-20">
+    <div onSubmit={handleSubmit} className="min-h-screen mt-20">
       <div className="flex p-3 max-w-3xl mx-auto flex-col md:flex-row md:items-center gap-5">
         {/* left side start here */}
         <div className="flex-1">
@@ -30,6 +92,7 @@ const SignUp = () => {
                 type="text"
                 placeholder="Enter Your UserName..."
                 id="username"
+                onChange={handleChange}
               />
             </div>
             <div>
@@ -38,22 +101,43 @@ const SignUp = () => {
                 type="email"
                 placeholder="Enter Your Email..."
                 id="email"
+                onChange={handleChange}
               />
             </div>
-            <div>
+            <div className="relative">
               <Label value="Your Password:" />
               <TextInput
-                type="password"
+                type={showPassword ? "text" : "password"}
                 placeholder="Enter Your Password..."
                 id="password"
+                onChange={handleChange}
               />
+              {showPassword ? (
+                <FaEyeSlash
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="text-xl cursor-pointer absolute top-9 right-3"
+                />
+              ) : (
+                <FaEye
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="text-xl cursor-pointer absolute top-9 right-3"
+                />
+              )}
             </div>
             <Button
               type="submit"
               className="uppercase"
               gradientDuoTone={"greenToBlue"}
+              disabled={loading}
             >
-              Sign Up
+              {loading ? (
+                <>
+                  <Spinner size={"sm"} color={"failure"} />
+                  <span className="pl-3">Loading...</span>
+                </>
+              ) : (
+                "Sign Up"
+              )}
             </Button>
           </form>
           <div className="flex gap-2 text-sm mt-5">
@@ -70,6 +154,30 @@ const SignUp = () => {
         </div>
         {/* right side end here */}
       </div>
+      {error && (
+        <div className=" max-w-2xl mx-auto  flex justify-center ">
+          <Alert
+            icon={VscError}
+            color={"failure"}
+            className="mt-5  font-semibold"
+          >
+            {error}
+          </Alert>
+        </div>
+      )}
+      {
+        success && (
+          <div className="max-w-2xl mx-auto flex justify-center ">
+            <Alert
+              icon={FaHandshake}
+              color={"success"}
+              className="mt-5 font-semibold"
+            >
+              User Sign Up Successfully!...
+            </Alert>
+          </div>
+        )
+      }
     </div>
   );
 };
