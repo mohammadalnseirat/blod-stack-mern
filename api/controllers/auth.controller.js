@@ -55,7 +55,7 @@ export const signUpPost = async (req, res, next) => {
 export const signInPost = async (req, res, next) => {
   // Implement Sign In Logic Here:
   const { email, password } = req.body;
-  if(!email || !password || email === '' || password === ' '){
+  if (!email || !password || email === "" || password === " ") {
     return next(handleErrors(403, "Please Fill All Required Fields!."));
   }
   try {
@@ -64,13 +64,13 @@ export const signInPost = async (req, res, next) => {
     if (!user) {
       return next(handleErrors(403, "Invalid Email or Password!."));
     }
-
     // compare Password:
     const passwordMatched = bcryptjs.compareSync(password, user.password);
     if (!passwordMatched) {
-      return next(handleErrors(403, "Invalid Password! Enter a correct Password."));
+      return next(
+        handleErrors(403, "Invalid Password! Enter a correct Password.")
+      );
     }
-
     // Generate JWT:
     const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET_KEY);
     // Hide the password:

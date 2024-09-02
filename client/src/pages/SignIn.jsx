@@ -3,14 +3,20 @@ import { Link, useNavigate } from "react-router-dom";
 import { Alert, Button, Label, Spinner, TextInput } from "flowbite-react";
 import { FaEye, FaEyeSlash, FaHandshake } from "react-icons/fa";
 import { VscError } from "react-icons/vsc";
+import {
+  signInStart,
+  signInSuccess,
+  signInFailure,
+} from "../redux/userSlice/userSlice";
+import { useDispatch, useSelector } from "react-redux";
 
 const SignIn = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({});
-  const [error, setError] = useState(null);
-  const [loading, setLoading] = useState(false);
+  const { error, loading } = useSelector((state) => state.user);
   const [success, setSuccess] = useState(false);
   const navigate = useNavigate();
+  const dispatch = useDispatch();
 
   // handle change the input field:
   const handleChange = (e) => {
@@ -25,9 +31,8 @@ const SignIn = () => {
       return setError("Please Fill All required!.");
     }
     try {
-      setLoading(true);
+      dispatch(signInStart());
       setSuccess(false);
-      setError(null);
       // create a new reponse:
       const res = await fetch("/api/auth/signin", {
         method: "POST",
@@ -38,21 +43,20 @@ const SignIn = () => {
       // convert to json:
       const data = await res.json();
       if (data.success === false) {
-        setError(data.message);
-        setLoading(false);
+        dispatch(signInFailure(data.message));
         return;
       }
-      setLoading(false);
-      setSuccess(true);
+
       // navigate to home page:
       if (res.ok) {
+        dispatch(signInSuccess(data));
+        setSuccess(true);
         timeOutId = setTimeout(() => {
           navigate("/");
         }, 2000);
       }
     } catch (error) {
-      setError(error.message);
-      setLoading(false);
+      dispatch(signInFailure(error.message));
     }
   };
 
