@@ -68,7 +68,7 @@ export const signInPost = async (req, res, next) => {
     // compare Password:
     const passwordMatched = bcryptjs.compareSync(password, user.password);
     if (!passwordMatched) {
-      return next(handleErrors(403, "Invalid Password!."));
+      return next(handleErrors(403, "Invalid Password! Enter a correct Password."));
     }
 
     // Generate JWT:
