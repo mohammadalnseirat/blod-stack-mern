@@ -19,7 +19,6 @@ const App = () => {
       <Route path='/sign-in' element={<SignIn/>}/>
       <Route path='/sign-up' element={<SignUp/>}/>
       <Route path='/projects' element={<Projects/>}/>
-      <Route path='/profile' element={<Profile/>}/>
       <Route path='/dashboard' element={<Dashboard/>}/>
     </Routes>
     <FooterCom/>
