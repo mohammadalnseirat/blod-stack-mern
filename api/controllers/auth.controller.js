@@ -91,3 +91,59 @@ export const signInPost = async (req, res, next) => {
     next(error);
   }
 };
+
+// 3- Function to create Google Account:
+export const google_Post = async (req, res, next) => {
+  const { email, name, googlePhotoUrl } = req.body;
+  try {
+    const user = await User.findOne({ email });
+    // check if user already exists:
+    if (user) {
+      // store token in cookie:
+      const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET_KEY);
+      const { password, ...rest } = user._doc;
+      res
+        .status(200)
+        .cookie("access_token", token, {
+          httpOnly: true,
+          secure: process.env.NODE_ENV === "production",
+          sameSite: "strict", // prevents CSRF attack, cross-site request forgery attack
+          maxAge: 1000 * 60 * 60 * 24,
+        })
+        .json(rest);
+    } else {
+      // create reandom password:
+      const generatPassword =
+        Math.random().toString(36).slice(-8) +
+        Math.random().toString(36).slice(-8);
+
+      // hash password:
+      const hashedPassword = bcryptjs.hashSync(generatPassword, 10);
+      // create new user:
+      const newUser = new User({
+        username:
+          name.toLowerCase().split(" ").join("") +
+          Math.random().toString(9).slice(-4),
+        email,
+        password: hashedPassword,
+        profilePhoto: googlePhotoUrl,
+      });
+      // save to database:
+      await newUser.save();
+      // store token in cookie:
+      const token = jwt.sign({ id: newUser._id }, process.env.JWT_SECRET_KEY);
+      const { password, ...rest } = newUser._doc;
+      res
+        .status(200)
+        .cookie("access_token", token, {
+          httpOnly: true,
+          secure: process.env.NODE_ENV === "production",
+          sameSite: "strict", // prevents CSRF attack, cross-site request forgery attack
+          maxAge: 1000 * 60 * 60 * 24,
+        })
+        .json(rest);
+    }
+  } catch (error) {
+    next(error);
+  }
+};

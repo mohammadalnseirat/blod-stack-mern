@@ -14,9 +14,10 @@ const persistConfig = {
   storage,
   version: 1,
 };
-
+// 3- create persistedReducer and us it in store:
 const persistedReducer = persistReducer(persistConfig, rootReducer);
 
+// 4- Create a store with persisted reducer:
 export const store = configureStore({
   reducer: persistedReducer,
   // MiddleWare to prevent default error in redux:
@@ -27,3 +28,6 @@ export const store = configureStore({
 });
 
 export const persistor = persistStore(store);
+
+
+// 5- redux-persist uses to store data in local storage.
