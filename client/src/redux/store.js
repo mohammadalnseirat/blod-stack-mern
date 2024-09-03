@@ -1,11 +1,13 @@
 import { configureStore, combineReducers } from "@reduxjs/toolkit";
 import userReducer from "./userSlice/userSlice";
+import themeReducer from "./theme/themeSlice";
 import storage from "redux-persist/lib/storage";
 import { persistReducer, persistStore } from "redux-persist";
 
 // 1- Create a root reducer:
 const rootReducer = combineReducers({
   user: userReducer,
+  theme: themeReducer,
 });
 
 // 2- configure store
@@ -28,6 +30,5 @@ export const store = configureStore({
 });
 
 export const persistor = persistStore(store);
-
 
 // 5- redux-persist uses to store data in local storage.
