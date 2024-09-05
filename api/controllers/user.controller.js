@@ -10,7 +10,7 @@ export const test_get = (req, res) => {
 export const updateUser_put = async (req, res, next) => {
   // const { userId } = req.params;
   // check if the user is already existing
-  if (req.user.id !== userId) {
+  if (req.user.id !== req.params.userId) {
     return next(handleErrors(403, "Your not allowed to update this user!."));
   }
   // check the password:
@@ -37,24 +37,21 @@ export const updateUser_put = async (req, res, next) => {
     if (!req.body.username || !req.body.username === "") {
       return next(handleErrors(400, "Username is required!"));
     }
-    if (req.body.username.length < 7 || req.body.username.length < 15) {
+    if (req.body.username.length < 7 || req.body.username.length > 20) {
       return next(
-        handleErrors(
-          400,
-          "Username must be at least 7 and at most 15 characters long!"
-        )
+        handleErrors(400, "Username must be between 7 and  20 characters long!")
       );
     }
     if (req.body.username.includes(" ")) {
-      return next(handleErrors(400, "Username cannot contain any spaces!"));
+      return next(handleErrors(401, "Username cannot contain any spaces!"));
     }
     if (!req.body.username.match(/^[a-zA-Z0-9]+$/)) {
       return next(
-        handleErrors(400, "Username can only contain Nu,bers and Letters!")
+        handleErrors(401, "Username can only contain Numbers and Letters!")
       );
     }
     if (req.body.username !== req.body.username.toLowerCase()) {
-      return next(handleErrors(400, "Username must be in lowercase!"));
+      return next(handleErrors(401, "Username must be in lowercase!"));
     }
   }
   // check the email:

@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
-import { useSelector } from "react-redux";
-import { Alert, Button, TextInput } from "flowbite-react";
+import { Alert, Button, Spinner, TextInput } from "flowbite-react";
 import { AiOutlineCloseCircle } from "react-icons/ai";
+import { MdCheckCircle } from "react-icons/md";
 import {
   getDownloadURL,
   getStorage,
@@ -11,16 +11,26 @@ import {
 import { app } from "../firebase";
 import { CircularProgressbar } from "react-circular-progressbar";
 import "react-circular-progressbar/dist/styles.css";
+import {
+  updateStart,
+  updateSuccess,
+  updateFailure,
+} from "../redux/userSlice/userSlice";
+import { useDispatch, useSelector } from "react-redux";
 
 const DashProfile = () => {
-  const { currentUser } = useSelector((state) => state.user);
+  const { currentUser,loading } = useSelector((state) => state.user);
   const filePickerClick = useRef();
   // Add Some State to upload image:
   const [imageFile, setImageFile] = useState(null);
+  const [formData, setFormData] = useState({});
+  const [updateUserSuccess, setUpdateUserSuccess] = useState(null);
+  const [updateUserError, setUpdateUserError] = useState(null);
+  const [imageFileUploading, setImageFileUploading] = useState(false);
   const [imageFileUrl, setImageFileUrl] = useState(null);
   const [imageFileUploadProgress, setImageFileUploadProgress] = useState(0);
   const [imageFileUploadError, setImageFileUploadError] = useState(null);
-  console.log(imageFileUploadProgress, imageFileUploadError);
+  const dispatch = useDispatch();
   // handle Image Change
   const handleImageChange = (e) => {
     const file = e.target.files[0];
@@ -39,7 +49,10 @@ const DashProfile = () => {
 
   // Function to upload image:
   const uploadImage = async () => {
+    setImageFileUploading(true);
     setImageFileUploadError(null);
+    setUpdateUserError(null)
+    setUpdateUserSuccess(null);
     const storage = getStorage(app);
     const fileName = new Date().getTime() + imageFile.name;
     const storageRef = ref(storage, fileName);
@@ -59,14 +72,66 @@ const DashProfile = () => {
         setImageFileUploadProgress(null);
         setImageFile(null);
         setImageFileUrl(null);
+        setImageFileUploading(false);
       },
       () => {
         getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
           setImageFileUrl(downloadURL);
+          setFormData({ ...formData, profilePhoto: downloadURL });
+          setImageFileUploading(false);
         });
       }
     );
   };
+
+  //handle Change The input:
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.id]: e.target.value });
+  };
+
+
+  // handle Submit the form:
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setUpdateUserSuccess(null)
+    setUpdateUserError(null)
+    // check if the form is empty:
+    if (Object.keys(formData).length === 0) {
+      setUpdateUserError('No changes were made!')
+      return;
+    }
+    if (imageFileUploading) {
+      setUpdateUserError("Please wait while the image is uploading!")
+      return;
+    }
+
+    try {
+      // setUpdateUserSuccess(null);
+      dispatch(updateStart());
+      // create the response:
+      const res = await fetch(`/api/user/update/${currentUser._id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData),
+      });
+
+      // convertt the data into a json object
+      const data = await res.json();
+      if (!res.ok) {
+        dispatch(updateFailure(data.message));
+        setUpdateUserError(data.message)
+        return;
+      } else {
+        dispatch(updateSuccess(data));
+        setUpdateUserSuccess("User updated successfully!");
+      }
+    } catch (error) {
+      console.log("Error updating user ", error.message);
+      dispatch(updateFailure(error.message));
+    }
+  };
+
+
   return (
     <div className=" max-w-lg mx-auto w-full p-3 my-4">
       <h1 className="my-7 text-center font-semibold text-3xl">
@@ -76,7 +141,7 @@ const DashProfile = () => {
         </span>
         ile
       </h1>
-      <form className="flex flex-col gap-5">
+      <form onSubmit={handleSubmit} className="flex flex-col gap-5">
         <input
           type="file"
           hidden
@@ -134,21 +199,36 @@ const DashProfile = () => {
           type="text"
           id="username"
           defaultValue={currentUser.username}
+          onChange={handleChange}
         />
         <TextInput
           placeholder="Enter email..."
           type="email"
           id="email"
           defaultValue={currentUser.email}
+          onChange={handleChange}
         />
-        <TextInput placeholder="password..." type="password" id="password" />
+        <TextInput
+          onChange={handleChange}
+          placeholder="password..."
+          type="password"
+          id="password"
+        />
         <Button
           type="submit"
           gradientDuoTone={"greenToBlue"}
           outline
           className="text-xl uppercase font-[500]"
+          disabled={loading || imageFileUploading}
         >
-          Update
+          {loading || imageFileUploading ? (
+            <>
+              <Spinner color="warning" size={"md"} />
+              <span className="pl-3">Updating...</span>
+            </>
+          ) : (
+            "Update"
+          )}
         </Button>
       </form>
       <div className="flex items-center justify-between mt-5">
@@ -159,6 +239,26 @@ const DashProfile = () => {
           Sign Out
         </span>
       </div>
+      {updateUserSuccess && (
+        <Alert
+          color={"success"}
+          icon={MdCheckCircle}
+          className="font-semibold mt-5"
+        >
+          {updateUserSuccess}
+        </Alert>
+      )}
+      {
+        updateUserError && (
+          <Alert
+            color={"failure"}
+            icon={AiOutlineCloseCircle}
+            className="font-semibold mt-5"
+          >
+            {updateUserError}
+          </Alert>
+        )
+      }
     </div>
   );
 };
