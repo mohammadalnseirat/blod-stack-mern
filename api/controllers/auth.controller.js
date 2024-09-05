@@ -82,7 +82,7 @@ export const signInPost = async (req, res, next) => {
         httpOnly: true, // prevent XSS attacks, cross site scripting attack
         secure: process.env.NODE_ENV === "production",
         sameSite: "strict", // // prevents CSRF attack, cross-site request forgery attack
-        maxAge: 2 * 24 * 60 * 60 * 100, // 2 Days
+        maxAge: 2* 24 * 60 * 60 * 1000, // Days
       })
       .status(201)
       .json(rest);

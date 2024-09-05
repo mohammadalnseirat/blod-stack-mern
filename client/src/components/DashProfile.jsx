@@ -17,6 +17,7 @@ import {
   updateFailure,
 } from "../redux/userSlice/userSlice";
 import { useDispatch, useSelector } from "react-redux";
+import ModelCom from "./ModelCom";
 
 const DashProfile = () => {
   const { currentUser,loading } = useSelector((state) => state.user);
@@ -30,6 +31,8 @@ const DashProfile = () => {
   const [imageFileUrl, setImageFileUrl] = useState(null);
   const [imageFileUploadProgress, setImageFileUploadProgress] = useState(0);
   const [imageFileUploadError, setImageFileUploadError] = useState(null);
+  // state to show model :
+  const [showModal, setShowModal] = useState(false);
   const dispatch = useDispatch();
   // handle Image Change
   const handleImageChange = (e) => {
@@ -232,7 +235,7 @@ const DashProfile = () => {
         </Button>
       </form>
       <div className="flex items-center justify-between mt-5">
-        <span className="cursor-pointer text-red-500 px-2 py-1 bg-gray-50 hover:bg-red-500 hover:text-white border-2 font-medium border-red-500 transition-all duration-150 rounded-md">
+        <span onClick={()=>setShowModal(true)} className="cursor-pointer text-red-500 px-2 py-1 bg-gray-50 hover:bg-red-500 hover:text-white border-2 font-medium border-red-500 transition-all duration-150 rounded-md">
           Delete Account
         </span>
         <span className="cursor-pointer text-red-500 px-2 py-1 bg-gray-100 hover:bg-red-500 hover:text-white border-2 font-medium border-red-500 transition-all duration-150 rounded-md">
@@ -259,6 +262,7 @@ const DashProfile = () => {
           </Alert>
         )
       }
+      <ModelCom showModal={showModal} setShowModal={setShowModal}/>
     </div>
   );
 };
