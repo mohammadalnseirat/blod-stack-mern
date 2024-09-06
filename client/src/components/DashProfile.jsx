@@ -19,6 +19,7 @@ import {
 } from "../redux/userSlice/userSlice";
 import { useDispatch, useSelector } from "react-redux";
 import ModelCom from "./ModelCom";
+import { Link } from "react-router-dom";
 
 const DashProfile = () => {
   const { currentUser, loading } = useSelector((state) => state.user);
@@ -252,6 +253,17 @@ const DashProfile = () => {
             "Update"
           )}
         </Button>
+        {currentUser && currentUser.isAdmin && (
+          <Link to={"/create-post"}>
+            <Button
+              gradientDuoTone={"cyanToBlue"}
+              className="w-full font-semibold"
+              type="button"
+            >
+              Create a Post
+            </Button>
+          </Link>
+        )}
       </form>
       <div className="flex items-center justify-between mt-5">
         <span
