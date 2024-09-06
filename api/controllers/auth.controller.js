@@ -72,7 +72,10 @@ export const signInPost = async (req, res, next) => {
       );
     }
     // Generate JWT:
-    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET_KEY);
+    const token = jwt.sign(
+      { id: user._id, isAdmin: user.isAdmin },
+      process.env.JWT_SECRET_KEY
+    );
     // Hide the password:
     const { passowrd, ...rest } = user._doc;
 
@@ -82,7 +85,7 @@ export const signInPost = async (req, res, next) => {
         httpOnly: true, // prevent XSS attacks, cross site scripting attack
         secure: process.env.NODE_ENV === "production",
         sameSite: "strict", // // prevents CSRF attack, cross-site request forgery attack
-        maxAge: 2* 24 * 60 * 60 * 1000, // Days
+        maxAge: 2 * 24 * 60 * 60 * 1000, // Days
       })
       .status(201)
       .json(rest);
@@ -100,7 +103,10 @@ export const google_Post = async (req, res, next) => {
     // check if user already exists:
     if (user) {
       // store token in cookie:
-      const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET_KEY);
+      const token = jwt.sign(
+        { id: user._id, isAdmin: user.isAdmin },
+        process.env.JWT_SECRET_KEY
+      );
       const { password, ...rest } = user._doc;
       res
         .status(200)
@@ -131,7 +137,10 @@ export const google_Post = async (req, res, next) => {
       // save to database:
       await newUser.save();
       // store token in cookie:
-      const token = jwt.sign({ id: newUser._id }, process.env.JWT_SECRET_KEY);
+      const token = jwt.sign(
+        { id: newUser._id, isAdmin: newUser.isAdmin },
+        process.env.JWT_SECRET_KEY
+      );
       const { password, ...rest } = newUser._doc;
       res
         .status(200)
@@ -147,5 +156,3 @@ export const google_Post = async (req, res, next) => {
     next(error);
   }
 };
-
-
