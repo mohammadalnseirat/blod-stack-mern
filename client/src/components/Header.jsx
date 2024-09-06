@@ -5,12 +5,32 @@ import { AiOutlineSearch } from "react-icons/ai";
 import { FaMoon, FaSun } from "react-icons/fa";
 import { useSelector, useDispatch } from "react-redux";
 import { toggleTheme } from "../redux/theme/themeSlice";
+import { signOutSuccess } from "../redux/userSlice/userSlice";
 
 const Header = () => {
   const path = useLocation().pathname;
   const { currentUser } = useSelector((state) => state.user);
   const { theme } = useSelector((state) => state.theme);
   const dispatch = useDispatch();
+
+  // handle User Delete:
+  const handleUserDelete = async () => {
+    try {
+      // create a response:
+      const res = await fetch("/api/user/signout", {
+        method: "POST",
+      });
+      // convert the response to json:
+      const data = await res.json();
+      if (!res.ok) {
+        console.log(data.message);
+      } else {
+        dispatch(signOutSuccess(data));
+      }
+    } catch (error) {
+      console.log("Error signing out user: ", error.message);
+    }
+  };
 
   return (
     <Navbar className="border-b-2 border-gray-300 shadow-sm bg-gray-50">
@@ -78,7 +98,10 @@ const Header = () => {
                 Profile
               </Dropdown.Item>
             </Link>
-            <Dropdown.Item className="font-semibold border-none text-gray-700 hover:text-red-500 text-md transition-all duration-150">
+            <Dropdown.Item
+              onClick={handleUserDelete}
+              className="font-semibold border-none text-gray-700 hover:text-red-500 text-md transition-all duration-150"
+            >
               Sign Out
             </Dropdown.Item>
           </Dropdown>

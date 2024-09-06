@@ -95,3 +95,15 @@ export const deleteUser = async (req, res, next) => {
     next(error);
   }
 };
+
+
+// 4- Function to Create sign out api routes:
+export const signOut_post = (req,res,next)=>{
+  try {
+    res.clearCookie('access_token').status(200).json('User has been Signed Out successfully');
+  } catch (error) {
+    console.log('Error signing out user', error.message);
+    next(error);
+    
+  }
+}

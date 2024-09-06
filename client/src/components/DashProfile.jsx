@@ -15,12 +15,13 @@ import {
   updateStart,
   updateSuccess,
   updateFailure,
+  signOutSuccess,
 } from "../redux/userSlice/userSlice";
 import { useDispatch, useSelector } from "react-redux";
 import ModelCom from "./ModelCom";
 
 const DashProfile = () => {
-  const { currentUser,loading } = useSelector((state) => state.user);
+  const { currentUser, loading } = useSelector((state) => state.user);
   const filePickerClick = useRef();
   // Add Some State to upload image:
   const [imageFile, setImageFile] = useState(null);
@@ -54,7 +55,7 @@ const DashProfile = () => {
   const uploadImage = async () => {
     setImageFileUploading(true);
     setImageFileUploadError(null);
-    setUpdateUserError(null)
+    setUpdateUserError(null);
     setUpdateUserSuccess(null);
     const storage = getStorage(app);
     const fileName = new Date().getTime() + imageFile.name;
@@ -92,19 +93,18 @@ const DashProfile = () => {
     setFormData({ ...formData, [e.target.id]: e.target.value });
   };
 
-
   // handle Submit the form:
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setUpdateUserSuccess(null)
-    setUpdateUserError(null)
+    setUpdateUserSuccess(null);
+    setUpdateUserError(null);
     // check if the form is empty:
     if (Object.keys(formData).length === 0) {
-      setUpdateUserError('No changes were made!')
+      setUpdateUserError("No changes were made!");
       return;
     }
     if (imageFileUploading) {
-      setUpdateUserError("Please wait while the image is uploading!")
+      setUpdateUserError("Please wait while the image is uploading!");
       return;
     }
 
@@ -122,7 +122,7 @@ const DashProfile = () => {
       const data = await res.json();
       if (!res.ok) {
         dispatch(updateFailure(data.message));
-        setUpdateUserError(data.message)
+        setUpdateUserError(data.message);
         return;
       } else {
         dispatch(updateSuccess(data));
@@ -134,6 +134,25 @@ const DashProfile = () => {
     }
   };
 
+  // handle Sign Out User:
+  const handleSignOutUser = async () => {
+    try {
+      // create response:
+      const res = await fetch("/api/user/signout", {
+        method: "POST",
+      });
+      // convert the data into a json object
+      const data = await res.json();
+      if (!res.ok) {
+        console.log("Error signing out user ", error.message);
+        return;
+      } else {
+        dispatch(signOutSuccess(data));
+      }
+    } catch (error) {
+      console.log(error.message);
+    }
+  };
 
   return (
     <div className=" max-w-lg mx-auto w-full p-3 my-4">
@@ -235,10 +254,16 @@ const DashProfile = () => {
         </Button>
       </form>
       <div className="flex items-center justify-between mt-5">
-        <span onClick={()=>setShowModal(true)} className="cursor-pointer text-red-500 px-2 py-1 bg-gray-50 hover:bg-red-500 hover:text-white border-2 font-medium border-red-500 transition-all duration-150 rounded-md">
+        <span
+          onClick={() => setShowModal(true)}
+          className="cursor-pointer text-red-500 px-2 py-1 bg-gray-50 hover:bg-red-500 hover:text-white border-2 font-medium border-red-500 transition-all duration-150 rounded-md"
+        >
           Delete Account
         </span>
-        <span className="cursor-pointer text-red-500 px-2 py-1 bg-gray-100 hover:bg-red-500 hover:text-white border-2 font-medium border-red-500 transition-all duration-150 rounded-md">
+        <span
+          onClick={handleSignOutUser}
+          className="cursor-pointer text-red-500 px-2 py-1 bg-gray-100 hover:bg-red-500 hover:text-white border-2 font-medium border-red-500 transition-all duration-150 rounded-md"
+        >
           Sign Out
         </span>
       </div>
@@ -251,18 +276,16 @@ const DashProfile = () => {
           {updateUserSuccess}
         </Alert>
       )}
-      {
-        updateUserError && (
-          <Alert
-            color={"failure"}
-            icon={AiOutlineCloseCircle}
-            className="font-semibold mt-5"
-          >
-            {updateUserError}
-          </Alert>
-        )
-      }
-      <ModelCom showModal={showModal} setShowModal={setShowModal}/>
+      {updateUserError && (
+        <Alert
+          color={"failure"}
+          icon={AiOutlineCloseCircle}
+          className="font-semibold mt-5"
+        >
+          {updateUserError}
+        </Alert>
+      )}
+      <ModelCom showModal={showModal} setShowModal={setShowModal} />
     </div>
   );
 };
