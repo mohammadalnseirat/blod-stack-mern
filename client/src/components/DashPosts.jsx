@@ -1,8 +1,9 @@
-import { Table } from "flowbite-react";
+import { Button, Modal, Spinner, Table } from "flowbite-react";
 import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { Link } from "react-router-dom";
 import { TfiFaceSad } from "react-icons/tfi";
+import { MdErrorOutline } from "react-icons/md";
 
 const DashPosts = () => {
   const { currentUser } = useSelector((state) => state.user);
@@ -10,6 +11,10 @@ const DashPosts = () => {
   const [userPosts, setUserPosts] = useState([]);
   // state to show more posts:
   const [showMore, setShowMore] = useState(true);
+  // stste to show model:
+  const [showModal, setShowModal] = useState(false);
+  // stste to save id of post which will be deleted:
+  const [postIdToDelete, setPostIdToDelete] = useState("");
   // UseEffect to Fetch the data from the api:
   useEffect(() => {
     const fetchPosts = async () => {
@@ -59,6 +64,31 @@ const DashPosts = () => {
       console.log(error.message);
     }
   };
+
+  //Function To handle Delete Post:
+  const handleDeletePost = async () => {
+    setShowModal(false);
+    try {
+      // create response:
+      const res = await fetch(
+        `/api/post/deletepost/${postIdToDelete}/${currentUser._id}`,
+        {
+          method: "DELETE",
+        }
+      );
+      // convert the response to json:
+      const data = await res.json();
+      if (!res.ok) {
+        console.log(data.message);
+      } else {
+        setUserPosts((prevState) =>
+          prevState.filter((post) => post._id !== postIdToDelete)
+        );
+      }
+    } catch (error) {
+      console.log(error.message);
+    }
+  };
   return (
     <div className="table-auto overflow-x-scroll lg:overflow-x-hidden md:mx-auto p-3 my-5 scrollbar scrollbar-track-slate-200 scrollbar-thumb-slate-400 dark:scrollbar-track-cyan-200 dark:scrollbar-thumb-cyan-400">
       {currentUser.isAdmin && userPosts.length > 0 ? (
@@ -99,7 +129,13 @@ const DashPosts = () => {
                     {post.category}
                   </Table.Cell>
                   <Table.Cell>
-                    <span className="font-medium text-[16px] text-red-500  hover:underline hover:underline-offset-2 cursor-pointer">
+                    <span
+                      onClick={() => {
+                        setShowModal(true);
+                        setPostIdToDelete(post._id);
+                      }}
+                      className="font-medium text-[16px] text-red-500  hover:underline hover:underline-offset-2 cursor-pointer"
+                    >
                       Delete
                     </span>
                   </Table.Cell>
@@ -132,6 +168,36 @@ const DashPosts = () => {
           <TfiFaceSad className="text-6xl text-gray-700 dark:text-yellow-300" />
         </div>
       )}
+      <Modal
+        show={showModal}
+        popup
+        size={"md"}
+        onClose={() => setShowModal(false)}
+      >
+        <Modal.Header className="border border-red-500 rounded">
+          <Modal.Body>
+            <div className="text-center">
+              <MdErrorOutline className="h-14 w-14 text-red-600 mb-4 mx-auto" />
+              <h3 className=" text-lg text-gray-500 dark:text-gray-100 mb-5 ">
+                Are you sure you want to Dalete your Account?{" "}
+              </h3>
+            </div>
+            <div className="flex items-center justify-center gap-4">
+              <Button onClick={handleDeletePost} color={"failure"}>
+                "Yes,Im Sure"
+              </Button>
+              <Button
+                color={"gray"}
+                className="border border-gray-400 font-semibold"
+                onClick={() => setShowModal(false)}
+                appearance="secondary"
+              >
+                No, Cancel
+              </Button>
+            </div>
+          </Modal.Body>
+        </Modal.Header>
+      </Modal>
     </div>
   );
 };
