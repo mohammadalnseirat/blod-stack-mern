@@ -32,10 +32,65 @@ export const create_post = async (req, res, next) => {
     userId: req.user.id,
   });
   try {
-    const savedPost = await newPost.save()
+    const savedPost = await newPost.save();
     res.status(201).json(savedPost);
   } catch (error) {
     console.log("Error in creating new post", error.message);
+    next(error);
+  }
+};
+
+// 2- Function to get all posts from the database and Search:
+export const getPosts_get = async (req, res, next) => {
+  try {
+    // start Index:
+    const startIndex = parseInt(req.query.startIndex) || 0;
+    // limit:
+    const limit = parseInt(req.query.limit) || 9;
+    // sortDirection:
+    const sortDirection = req.query.order === "asc" ? 1 : -1;
+
+    // Find all posts and dependencies:
+    const posts = await Post.find({
+      ...(req.query.userId && { userId: req.query.userId }),
+      ...(req.query.category && { category: req.query.category }),
+      ...(req.query.slug && { slug: req.query.slug }),
+      ...(req.query.postId && { _id: req.query.postId }),
+      ...(req.query.searchTerm && {
+        $or: [
+          { title: { $regex: req.query.searchTerm, $options: "i" } },
+          { content: { $regex: req.query.searchTerm, $options: "i" } },
+        ],
+      }),
+    })
+      .sort({ updatedAt: sortDirection })
+      .skip(startIndex)
+      .limit(limit);
+
+    // get the total number of posts:
+    const totalPosts = await Post.countDocuments();
+
+    // get the time now:
+    const now = new Date();
+    // get one month ago:
+    const oneMonthAgo = new Date(
+      now.getFullYear(),
+      now.getMonth() - 1,
+      now.getDate()
+    );
+
+    // get the last month:
+    const lastMonthPosts = await Post.countDocuments({
+      createdAt: { $gte: oneMonthAgo },
+    });
+
+    res.status(200).json({
+      posts,
+      totalPosts,
+      lastMonthPosts,
+    });
+  } catch (error) {
+    console.log("Error in getting posts", error.message);
     next(error);
   }
 };
