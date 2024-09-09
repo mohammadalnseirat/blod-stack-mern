@@ -96,14 +96,65 @@ export const deleteUser = async (req, res, next) => {
   }
 };
 
-
 // 4- Function to Create sign out api routes:
-export const signOut_post = (req,res,next)=>{
+export const signOut_post = (req, res, next) => {
   try {
-    res.clearCookie('access_token').status(200).json('User has been Signed Out successfully');
+    res
+      .clearCookie("access_token")
+      .status(200)
+      .json("User has been Signed Out successfully");
   } catch (error) {
-    console.log('Error signing out user', error.message);
+    console.log("Error signing out user", error.message);
     next(error);
-    
   }
-}
+};
+
+// 5-Function to get All users:
+export const getAllUsers = async (req, res, next) => {
+  if (!req.user.isAdmin) {
+    return next(handleErrors(403, "You are not allowed to See all users!"));
+  }
+  try {
+    const startIndex = parseInt(req.query.startIndex) || 0;
+    const limit = parseInt(req.query.limit) || 9;
+    const sortDirection = req.query.sort === "asc" ? 1 : -1;
+
+    // get the users:
+    const users = await User.find()
+      .sort({ createdAt: sortDirection })
+      .skip(startIndex)
+      .limit(limit);
+
+    // users with out password:
+    const usersWithoutPassword = users.map((user) => {
+      const { passowrd, ...rest } = user._doc;
+      return rest;
+    });
+
+    // get total users:
+    const totalUsers = await User.countDocuments();
+
+    // get oneMonth ago:
+    const now = new Date();
+    const oneMonthAgo = new Date(
+      now.getFullYear(),
+      now.getMonth() - 1,
+      now.getDate()
+    );
+
+    // create last month users:
+    const lastMonthUsers = await User.countDocuments({
+      createdAt: { $gte: oneMonthAgo },
+    });
+
+    // send the response:
+    res.status(200).json({
+      users: usersWithoutPassword,
+      totalUsers,
+      lastMonthUsers,
+    });
+  } catch (error) {
+    console.log("Error getting users", error.message);
+    next(error);
+  }
+};
