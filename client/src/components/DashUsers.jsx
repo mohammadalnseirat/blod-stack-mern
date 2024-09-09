@@ -53,7 +53,7 @@ const DashUsers = () => {
         // update the userPosts array:
         setUsers((prevState) => [...prevState, ...data.users]);
         // check if there are more posts:
-        if (data.users.length <9) {
+        if (data.users.length < 9) {
           setShowMore(false);
         }
       } else {
@@ -65,7 +65,24 @@ const DashUsers = () => {
   };
 
   //Function To handle Delete Post:
-  const handleDeleteUser = async () => {};
+  const handleDeleteUser = async () => {
+    try {
+      // create response:
+      const res = await fetch(`/api/user/delete/${userIdToDelete}`, {
+        method: "DELETE",
+      });
+      // convert the response to json:
+      const data = await res.json();
+      if (res.ok) {
+        setUsers((prev) => prev.filter((user) => user._id !== userIdToDelete));
+        setShowModal(false); // close modal after success message is shown
+      } else {
+        console.log(data.message);
+      }
+    } catch (error) {
+      console.log(error.message);
+    }
+  };
   return (
     <div className="table-auto overflow-x-scroll lg:overflow-x-hidden md:mx-auto p-3 my-5 scrollbar scrollbar-track-slate-200 scrollbar-thumb-slate-400 dark:scrollbar-track-cyan-200 dark:scrollbar-thumb-cyan-400">
       {currentUser.isAdmin && users.length > 0 ? (

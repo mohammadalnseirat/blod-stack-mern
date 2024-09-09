@@ -84,7 +84,7 @@ export const updateUser_put = async (req, res, next) => {
 
 // 3- Function to delete a user from the database
 export const deleteUser = async (req, res, next) => {
-  if (req.user.id !== req.params.userId) {
+  if (!req.user.isAdmin && req.user.id !== req.params.userId) {
     return next(handleErrors(403, "Your not allowed to delete this user!."));
   }
   try {
