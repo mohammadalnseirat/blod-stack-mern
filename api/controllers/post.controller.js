@@ -109,3 +109,31 @@ export const deletePost_delete = async (req, res, next) => {
     next(error);
   }
 };
+
+// Function to update a post
+export const updatePost_Put = async (req, res, next) => {
+  const postId = req.params.postId;
+  if (!req.user.isAdmin || req.user.id !== req.params.userId) {
+    return next(handleErrors(403, "You are not allowed to update a post!"));
+  }
+  try {
+    const updatedPost = await Post.findByIdAndUpdate(
+      req.params.postId,
+      {
+        $set: {
+          title: req.body.title,
+          category: req.body.category,
+          content: req.body.content,
+          image: req.body.image,
+        },
+      },
+      { new: true }
+    );
+
+    // send the response:
+    res.status(200).json(updatedPost);
+  } catch (error) {
+    console.log("Error in updating post", error.message);
+    next(error);
+  }
+};
