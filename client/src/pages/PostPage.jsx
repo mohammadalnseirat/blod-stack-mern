@@ -2,9 +2,10 @@ import { Button, Spinner } from "flowbite-react";
 import React, { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import CallToAction from "../components/CallToAction";
+import CommentSection from "../components/CommentSection";
 
 const PostPage = () => {
-  const { postslug } = useParams();
+  const { postSlug } = useParams();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
   // state to save the data when fetching posts:
@@ -16,7 +17,7 @@ const PostPage = () => {
         setLoading(true);
         setError(false);
         // create response:
-        const res = await fetch(`/api/post/getposts?slug=${postslug}`);
+        const res = await fetch(`/api/post/getposts?slug=${postSlug}`);
         // convert response to json:
         const data = await res.json();
         if (!res.ok) {
@@ -37,7 +38,7 @@ const PostPage = () => {
       }
     };
     fetchPost();
-  }, [postslug]);
+  }, [postSlug]);
 
   //   Put the loading :
   if (loading) {
@@ -81,6 +82,7 @@ const PostPage = () => {
       <div className="max-w-4xl mx-auto w-full">
         <CallToAction />
       </div>
+      <CommentSection postId={post._id} />
     </main>
   );
 };
