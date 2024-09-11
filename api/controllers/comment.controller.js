@@ -42,3 +42,27 @@ export const getCommentsPost_get = async (req, res, next) => {
     next(error);
   }
 };
+
+// 3-Function to add likes to comments:
+export const likeCommentPost_put = async (req, res, next) => {
+  try {
+    // find the comment by id:
+    const comment = await Comment.findById(req.params.commentId);
+    if (!comment) {
+      return next(errorHandler(404, "Comment not found"));
+    }
+    const userIndex = comment.likes.indexOf(req.user.id);
+    if (userIndex === -1) {
+      comment.numberOfLikes += 1; // add like comment
+      comment.likes.push(req.user.id); // add user to the array of likes
+    } else {
+      comment.numberOfLikes -= 1; // remove like comment
+      comment.likes.splice(userIndex, 1); // remove the user from the array of likes
+    }
+    await comment.save();
+    res.status(200).json(comment);
+  } catch (error) {
+    console.log("Error in liking comment", error.message);
+    next(error);
+  }
+};

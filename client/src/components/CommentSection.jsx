@@ -1,7 +1,7 @@
 import { Alert, Button, Spinner, Textarea } from "flowbite-react";
 import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { BsFillSendFill } from "react-icons/bs";
 import { BiSolidCommentError } from "react-icons/bi";
 import { VscDebugBreakpointLog } from "react-icons/vsc";
@@ -17,6 +17,7 @@ const CommentSection = ({ postId }) => {
   const [commentLoading, setCommentLoading] = useState(false);
   // state to save the fetched comments:
   const [comments, setComments] = useState([]);
+  const navigate = useNavigate();
 
   // handle Submit Comment:
   const handleSubmitComment = async (e) => {
@@ -84,6 +85,43 @@ const CommentSection = ({ postId }) => {
     getComments();
   }, [postId]);
 
+  // Function to add likes to the comment:
+  const addLikeComment = async (commentId) => {
+    try {
+      // check if there is user:
+      if (!currentUser) {
+        navigate("/sign-in");
+        return;
+      }
+
+      // create a response:
+      const res = await fetch(`/api/comment/likecomment/${commentId}`, {
+        method: "PUT",
+      });
+      // convert the response to json:
+      const data = await res.json();
+      if (!res.ok) {
+        console.log(data.message);
+        return;
+      }
+      if (res.ok) {
+        // update the comments:
+        setComments(
+          comments.map((comment) =>
+            comment._id === commentId
+              ? {
+                  ...comment,
+                  likes: data.likes,
+                  numberOfLikes: data.likes.length,
+                }
+              : comment
+          )
+        );
+      }
+    } catch (error) {
+      console.log("Error adding like to comment ", error.message);
+    }
+  };
   return (
     <div className="max-w-2xl mx-auto w-full p-3">
       {currentUser ? (
@@ -187,7 +225,11 @@ const CommentSection = ({ postId }) => {
             </div>
           </div>
           {comments.map((comment) => (
-            <CommentCom key={comment._id} comment={comment} />
+            <CommentCom
+              key={comment._id}
+              comment={comment}
+              onLike={addLikeComment}
+            />
           ))}
         </>
       )}
