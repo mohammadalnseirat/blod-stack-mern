@@ -158,3 +158,21 @@ export const getAllUsers = async (req, res, next) => {
     next(error);
   }
 };
+
+// 6-Function to get user by ID:
+export const getUser_get = async (req, res, next) => {
+  // const {userid} = req.params.userid;
+  try {
+    // find the user by id:
+    const user = await User.findById(req.params.userid);
+    if (!user) {
+      return next(handleErrors(404, "User not found!"));
+    }
+    // hide the password:
+    const { passowrd, ...rest } = user._doc;
+    res.status(200).json(rest);
+  } catch (error) {
+    console.log("Error getting user", error.message);
+    next(error);
+  }
+};

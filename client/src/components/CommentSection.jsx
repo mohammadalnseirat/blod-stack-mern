@@ -1,9 +1,11 @@
 import { Alert, Button, Spinner, Textarea } from "flowbite-react";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { Link } from "react-router-dom";
 import { BsFillSendFill } from "react-icons/bs";
 import { BiSolidCommentError } from "react-icons/bi";
+import { VscDebugBreakpointLog } from "react-icons/vsc";
+import CommentCom from "./CommentCom";
 
 const CommentSection = ({ postId }) => {
   // get the current user:
@@ -13,6 +15,8 @@ const CommentSection = ({ postId }) => {
   // state to show error and loading:
   const [commentError, setCommentError] = useState(null);
   const [commentLoading, setCommentLoading] = useState(false);
+  // state to save the fetched comments:
+  const [comments, setComments] = useState([]);
 
   // handle Submit Comment:
   const handleSubmitComment = async (e) => {
@@ -48,6 +52,8 @@ const CommentSection = ({ postId }) => {
         setCommentLoading(false);
         // // refresh comments:
         // window.location.reload()
+        setCommentError(null);
+        setComments([data, ...comments]);
       }
     } catch (error) {
       console.log("Error creating comment ", error.message);
@@ -55,6 +61,28 @@ const CommentSection = ({ postId }) => {
       setCommentLoading(false);
     }
   };
+
+  // useEffect to show the user:
+  useEffect(() => {
+    const getComments = async () => {
+      try {
+        // create response:
+        const res = await fetch(`/api/comment/getcommentsPost/${postId}`);
+        // convert response to json:
+        const data = await res.json();
+        if (!res.ok) {
+          console.log(data.message);
+          return;
+        }
+        if (res.ok) {
+          setComments(data);
+        }
+      } catch (error) {
+        console.log("Error getting user ", error.message);
+      }
+    };
+    getComments();
+  }, [postId]);
 
   return (
     <div className="max-w-2xl mx-auto w-full p-3">
@@ -137,6 +165,31 @@ const CommentSection = ({ postId }) => {
             </Alert>
           )}
         </form>
+      )}
+      {/*Show Comments */}
+      {comments.length === 0 ? (
+        <Alert
+          color={"failure"}
+          icon={BiSolidCommentError}
+          className="my-5 font-semibold text-sm"
+        >
+          No comments found. Be the first to comment.
+        </Alert>
+      ) : (
+        <>
+          <div className="flex items-center gap-1 my-5 ">
+            <p className="flex items-center font-semibold text-gray-500 dark:text-gray-300">
+              <VscDebugBreakpointLog className="text-[15px] mt-[1px] text-cyan-600" />{" "}
+              Comments:
+            </p>
+            <div className="border px-2 py-1  rounded-md border-gray-600 dark:border-cyan-600">
+              {comments.length}
+            </div>
+          </div>
+          {comments.map((comment) => (
+            <CommentCom key={comment._id} comment={comment} />
+          ))}
+        </>
       )}
     </div>
   );

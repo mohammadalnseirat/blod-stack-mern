@@ -5,6 +5,7 @@ import {
   signOut_post,
   test_get,
   updateUser_put,
+  getUser_get,
 } from "../controllers/user.controller.js";
 import { verifyToken } from "../utils/verifyUser.js";
 
@@ -15,5 +16,7 @@ router.put("/update/:userId", verifyToken, updateUser_put); // Protects the rout
 router.delete("/delete/:userId", verifyToken, deleteUser); // Protects the routes this is bcz no one can delete the user if it is not authenticated.
 router.post("/signout", signOut_post);
 router.get("/getusers", verifyToken, getAllUsers);
+// route to get the single user:
+router.get("/:userid", getUser_get);
 
 export default router;

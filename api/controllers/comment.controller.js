@@ -28,3 +28,17 @@ export const createcomment_post = async (req, res, next) => {
     next(error);
   }
 };
+
+// 2-Function to get comments post:
+export const getCommentsPost_get = async (req, res, next) => {
+  try {
+    // find comments:
+    const comments = await Comment.find({ postId: req.params.postId }).sort({
+      createdAt: -1, // to show the new comment in the top-level comments;
+    });
+    res.status(200).json(comments);
+  } catch (error) {
+    console.log("Error getting comments", error.message);
+    next(error);
+  }
+};
