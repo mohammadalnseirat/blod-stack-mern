@@ -66,3 +66,36 @@ export const likeCommentPost_put = async (req, res, next) => {
     next(error);
   }
 };
+
+// 4-Function to edit the comment:
+export const editCommentPost_put = async (req, res, next) => {
+  try {
+    // find the comment by id to update:
+    const comment = await Comment.findById(req.params.commentId);
+    // check if there is a comment:
+    if (!comment) {
+      return next(errorHandler(404, "Comment not found"));
+    }
+    // check if the user is the owner of the comment:
+    if (comment.userId !== req.user.id && !req.user.isAdmin) {
+      return next(
+        errorHandler(403, "You are not allowed to edit this comment")
+      );
+    }
+
+    // edited the comment:
+    const editedComment = await Comment.findByIdAndUpdate(
+      req.params.commentId,
+      {
+        content: req.body.content,
+      },
+      { new: true }
+    );
+
+    // send the edited comment
+    res.status(200).json(editedComment);
+  } catch (error) {
+    console.log("Error in editing comment", error.message);
+    next(error);
+  }
+};

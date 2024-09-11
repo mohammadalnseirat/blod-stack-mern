@@ -105,6 +105,7 @@ const CommentSection = ({ postId }) => {
         return;
       }
       if (res.ok) {
+        // console.log(data) // // to check if the respose is ok or not
         // update the comments:
         setComments(
           comments.map((comment) =>
@@ -113,6 +114,7 @@ const CommentSection = ({ postId }) => {
                   ...comment,
                   likes: data.likes,
                   numberOfLikes: data.likes.length,
+                  // numberOfLikes:data.numberOfLikes // second way to get number of likes
                 }
               : comment
           )
@@ -121,6 +123,15 @@ const CommentSection = ({ postId }) => {
     } catch (error) {
       console.log("Error adding like to comment ", error.message);
     }
+  };
+
+  // Function to Edit Comments:
+  const handleEditComment = (comment, editedContent) => {
+    setComments(
+      comments.map((c) =>
+        c._id === comment._id ? { ...c, content: editedContent } : c
+      )
+    );
   };
   return (
     <div className="max-w-2xl mx-auto w-full p-3">
@@ -229,6 +240,7 @@ const CommentSection = ({ postId }) => {
               key={comment._id}
               comment={comment}
               onLike={addLikeComment}
+              onEdit={handleEditComment}
             />
           ))}
         </>
