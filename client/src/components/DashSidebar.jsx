@@ -10,6 +10,7 @@ import { Link, useLocation } from "react-router-dom";
 import { signOutSuccess } from "../redux/userSlice/userSlice";
 import { useDispatch, useSelector } from "react-redux";
 import { VscCommentDiscussion } from "react-icons/vsc";
+import { IoBarChartSharp } from "react-icons/io5";
 
 const DashSidebar = () => {
   const location = useLocation();
@@ -47,6 +48,21 @@ const DashSidebar = () => {
     <Sidebar className="w-full md:w-56 border-r border-t-2 border-r-gray-300 dark:border-t-transparent dark:border-r-transparent">
       <Sidebar.Items>
         <Sidebar.ItemGroup className="flex flex-col gap-2">
+          {
+            currentUser && currentUser.isAdmin &&(
+              <Link to={"/dashboard?tab=dash"}>
+              <Sidebar.Item
+                as="div"
+                icon={IoBarChartSharp}
+                // labelColor={"dark"}
+                active={tab === "dash" || !tab}
+                className="font-[600]"
+              >
+                Dashboard
+              </Sidebar.Item>
+            </Link>
+            )
+          }
           <Link to={"/dashboard?tab=profile"}>
             <Sidebar.Item
               as={"div"}

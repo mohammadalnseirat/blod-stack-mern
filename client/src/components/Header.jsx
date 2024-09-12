@@ -93,6 +93,13 @@ const Header = () => {
                 {currentUser.email}
               </span>
             </Dropdown.Header>
+            {currentUser && currentUser.isAdmin && (
+              <Link to={"/dashboard?tab=dash"}>
+                <Dropdown.Item className="font-semibold border-none bg-transparent text-gray-700 text-md hover:text-red-500 transition-all duration-150">
+                  DashBoard
+                </Dropdown.Item>
+              </Link>
+            )}
             <Link to={"/dashboard?tab=profile"}>
               <Dropdown.Item className="font-semibold border-none bg-transparent text-gray-700 text-md hover:text-red-500 transition-all duration-150">
                 Profile
