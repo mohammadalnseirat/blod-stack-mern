@@ -5,13 +5,14 @@ import { useSelector } from "react-redux";
 import { FiEdit } from "react-icons/fi";
 import { IoSaveSharp } from "react-icons/io5";
 import { Button, Textarea } from "flowbite-react";
+import { RiDeleteBinLine } from "react-icons/ri";
 
-const CommentCom = ({ comment, onLike, onEdit }) => {
+const CommentCom = ({ comment, onLike, onEdit, onDelete }) => {
   // get the currentUser:
   const { currentUser } = useSelector((state) => state.user);
   // state to save the user's comment
   const [user, setUser] = useState({});
-  // state to show text area:
+  // state to show text area to edit the comment:
   const [isEditing, setIsEditing] = useState(false);
   // state to save edited comment:
   const [editedComment, setEditedComment] = useState(comment.content);
@@ -65,6 +66,8 @@ const CommentCom = ({ comment, onLike, onEdit }) => {
       console.log("Error saving edited comment ", error.message);
     }
   };
+
+  // handle delete comment:
   return (
     <div className="p-4 flex border-b rounded-xl border-b-gray-400 dark:border-b-cyan-500">
       {/* div for image start here */}
@@ -134,13 +137,24 @@ const CommentCom = ({ comment, onLike, onEdit }) => {
               </p>
               {currentUser &&
                 (currentUser._id === comment.userId || currentUser.isAdmin) && (
-                  <button
-                    type="button"
-                    className="text-green-600 dark:text-gray-300 dark:hover:text-green-500 active:scale-75 transition-all duration-150"
-                    onClick={handleEdit}
-                  >
-                    <FiEdit className="text-[18px]" />
-                  </button>
+                  <>
+                    <button
+                      type="button"
+                      className="text-green-600 dark:text-gray-300 dark:hover:text-green-500 active:scale-75 transition-all duration-150"
+                      onClick={handleEdit}
+                      title="Edit comment"
+                    >
+                      <FiEdit className="text-[18px]" />
+                    </button>
+                    <button
+                      onClick={() => onDelete(comment._id)}
+                      title="Delete comment"
+                      type="button"
+                      className="text-red-600 dark:text-gray-300 dark:hover:text-red-500 active:scale-75 transition-all duration-150"
+                    >
+                      <RiDeleteBinLine className="text-[18px]" />
+                    </button>
+                  </>
                 )}
             </div>
           </>

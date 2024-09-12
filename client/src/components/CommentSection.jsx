@@ -1,4 +1,4 @@
-import { Alert, Button, Spinner, Textarea } from "flowbite-react";
+import { Alert, Button, Modal, Spinner, Textarea } from "flowbite-react";
 import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { Link, useNavigate } from "react-router-dom";
@@ -6,6 +6,7 @@ import { BsFillSendFill } from "react-icons/bs";
 import { BiSolidCommentError } from "react-icons/bi";
 import { VscDebugBreakpointLog } from "react-icons/vsc";
 import CommentCom from "./CommentCom";
+import { MdErrorOutline } from "react-icons/md";
 
 const CommentSection = ({ postId }) => {
   // get the current user:
@@ -17,6 +18,9 @@ const CommentSection = ({ postId }) => {
   const [commentLoading, setCommentLoading] = useState(false);
   // state to save the fetched comments:
   const [comments, setComments] = useState([]);
+  const [showModal, setShowModal] = useState(false);
+  // state to save id of the comment to delete:
+  const [commentIdToDelete, setCommentIdToDelete] = useState(null);
   const navigate = useNavigate();
 
   // handle Submit Comment:
@@ -133,6 +137,34 @@ const CommentSection = ({ postId }) => {
       )
     );
   };
+  // Function to Delete Comments:
+  const handleDeleteComment = async (commentId) => {
+    try {
+      // check if the user no authorized:
+      if (!currentUser) {
+        navigate("/sign-in");
+        return;
+      }
+      // create a response:
+      const res = await fetch(`/api/comment/deleteComment/${commentId}`, {
+        method: "DELETE",
+      });
+      // convert the response to json:
+      const data = await res.json();
+      if (!res.ok) {
+        console.log(data.message);
+        return;
+      }
+      if (res.ok) {
+        // update the comments:
+        setComments(comments.filter((comm) => comm._id !== commentId));
+        setShowModal(false);
+        setCommentIdToDelete(null);
+      }
+    } catch (error) {
+      console.log("Error deleting comment ", error.message);
+    }
+  };
   return (
     <div className="max-w-2xl mx-auto w-full p-3">
       {currentUser ? (
@@ -241,10 +273,47 @@ const CommentSection = ({ postId }) => {
               comment={comment}
               onLike={addLikeComment}
               onEdit={handleEditComment}
+              onDelete={(commentId) => {
+                setShowModal(true);
+                setCommentIdToDelete(commentId);
+              }}
             />
           ))}
         </>
       )}
+      <Modal
+        show={showModal}
+        popup
+        size={"md"}
+        onClose={() => setShowModal(false)}
+      >
+        <Modal.Header className="border-2 border-red-500 rounded">
+          <Modal.Body>
+            <div className="text-center">
+              <MdErrorOutline className="h-14 w-14 text-red-600 mb-4 mx-auto" />
+              <h3 className=" text-lg text-gray-500 dark:text-gray-100 mb-5 ">
+                Are you sure you want to Dalete this Comment?{" "}
+              </h3>
+            </div>
+            <div className="flex items-center justify-center gap-4">
+              <Button
+                onClick={() => handleDeleteComment(commentIdToDelete)}
+                color={"failure"}
+              >
+                "Yes,Im Sure"
+              </Button>
+              <Button
+                color={"gray"}
+                className="border border-gray-400 font-semibold"
+                onClick={() => setShowModal(false)}
+                appearance="secondary"
+              >
+                No, Cancel
+              </Button>
+            </div>
+          </Modal.Body>
+        </Modal.Header>
+      </Modal>
     </div>
   );
 };
