@@ -167,7 +167,7 @@ const DashUsers = () => {
             <div className="text-center">
               <MdErrorOutline className="h-14 w-14 text-red-600 mb-4 mx-auto" />
               <h3 className=" text-lg text-gray-500 dark:text-gray-100 mb-5 ">
-                Are you sure you want to Dalete your User?{" "}
+                Are you sure you want to Dalete This User?{" "}
               </h3>
             </div>
             <div className="flex items-center justify-center gap-4">

@@ -9,6 +9,7 @@ import {
 import { Link, useLocation } from "react-router-dom";
 import { signOutSuccess } from "../redux/userSlice/userSlice";
 import { useDispatch, useSelector } from "react-redux";
+import { VscCommentDiscussion } from "react-icons/vsc";
 
 const DashSidebar = () => {
   const location = useLocation();
@@ -72,6 +73,7 @@ const DashSidebar = () => {
             </Link>
           )}
           {currentUser && currentUser.isAdmin && (
+            <>
             <Link to={"/dashboard?tab=users"}>
               <Sidebar.Item
                 as="div"
@@ -83,6 +85,18 @@ const DashSidebar = () => {
                 Users
               </Sidebar.Item>
             </Link>
+            <Link to={"/dashboard?tab=comments"}>
+              <Sidebar.Item
+                as="div"
+                icon={VscCommentDiscussion}
+                // labelColor={"dark"}
+                active={tab === "comments"}
+                className="font-[600]"
+              >
+                Comments
+              </Sidebar.Item>
+            </Link>
+            </>
           )}
           <Sidebar.Item
             onClick={handleDelete}

@@ -174,7 +174,7 @@ const DashPosts = () => {
         size={"md"}
         onClose={() => setShowModal(false)}
       >
-        <Modal.Header className="border border-red-500 rounded">
+        <Modal.Header className="border-2 border-red-500 rounded">
           <Modal.Body>
             <div className="text-center">
               <MdErrorOutline className="h-14 w-14 text-red-600 mb-4 mx-auto" />
