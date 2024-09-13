@@ -4,7 +4,7 @@ import { MdOutlineAccessTimeFilled } from "react-icons/md";
 
 const PostCard = ({ post }) => {
   return (
-    <div className="group relative  w-full border-2 border-cyan-600  h-[400px] overflow-hidden rounded-lg sm:w-[350px] transition-all duration-300">
+    <div className="group relative shadow-md  w-full border-2 border-cyan-600  h-[400px] overflow-hidden rounded-lg sm:w-[350px] transition-all duration-300">
       <Link to={`/post/${post.slug}`}>
         <img
           src={post.image}

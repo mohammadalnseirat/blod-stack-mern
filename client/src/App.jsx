@@ -13,6 +13,7 @@ import CreatePost from "./pages/CreatePost";
 import UpdatePost from "./pages/UpdatePost";
 import PostPage from "./pages/PostPage";
 import ScrollToTop from "./components/ScrollToTop";
+import SearchPage from "./pages/SearchPage";
 
 const App = () => {
   return (
@@ -33,6 +34,7 @@ const App = () => {
           <Route path="/update-post/:postId" element={<UpdatePost />} />
         </Route>
         <Route path="/post/:postSlug" element={<PostPage />} />
+        <Route path="/search" element={<SearchPage />} />
       </Routes>
       <FooterCom />
     </BrowserRouter>
