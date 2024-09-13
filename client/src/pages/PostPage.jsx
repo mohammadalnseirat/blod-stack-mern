@@ -51,7 +51,7 @@ const PostPage = () => {
         setLoading(true);
         setError(false);
         // create response:
-        const res = await fetch(`/api/post/getposts?limit=4`);
+        const res = await fetch(`/api/post/getposts?limit=3`);
         // convert response to json:
         const data = await res.json();
         if (!res.ok) {
